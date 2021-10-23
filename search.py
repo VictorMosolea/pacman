@@ -26,8 +26,8 @@ from util import *
 
 
 class Node:
-    def __init__(self, state, parent, action, cost):
-        self.state = state
+    def __init__(self, pos, parent, action, cost):
+        self.pos = pos
         self.parent = parent
         self.action = action
         self.cost = cost
@@ -88,115 +88,104 @@ def tinyMazeSearch(problem):
 
 
 def randomSearch(problem):
-    """
-    utils.Insert(Comments)
-    """
-    mystate = problem.getStartState()
-    list = []
-    while not problem.isGoalState(mystate):
-        succesor = random.choice(problem.getSuccessors(mystate))
-        list.append(succesor[1])
-        mystate = succesor[0]
-    return list
+    current_pos = problem.getStartState()
+    actions = []
+    while not problem.isGoalState(current_pos):
+        next_state = random.choice(problem.getSuccessors(current_pos))
+        actions.append(next_state[1])
+        current_pos = next_state[0]
+    return actions
 
 
 def depthFirstSearch(problem):
-    """
-    utils.Insert(Comments)
-    """
-    solution = []
+    actions = []
     visited = []
-    mystate = problem.getStartState()
+    current_pos = problem.getStartState()
     stack = Stack()
-    curentNode = Node(mystate, None, None, 0)
-    stack.push(curentNode)
-    while(not problem.isGoalState(curentNode.state) and not stack.isEmpty()):
-        curentNode = stack.pop()
-        visited.append(curentNode.state)
-        if (problem.isGoalState(curentNode.state)):
-            lastNode = curentNode
+    current_node = Node(current_pos, None, None, 0)
+    stack.push(current_node)
+    while(not problem.isGoalState(current_node.pos) and not stack.isEmpty()):
+        current_node = stack.pop()
+        visited.append(current_node.pos)
+        if (problem.isGoalState(current_node.pos)):
+            last_node = current_node
             break
 
-        succesors = problem.getSuccessors(curentNode.state)
-        for succesor in succesors:
-            succesorState = succesor[0]
-            if succesorState not in visited:
-                nextNode = Node(succesorState, curentNode,
-                                succesor[1], curentNode.cost + 1)
-                stack.push(nextNode)
-
-    while lastNode.parent is not None:
-        solution.append(lastNode.action)
-        lastNode = lastNode.parent
-    solution.reverse()
-    return solution
+        nexts = problem.getSuccessors(current_node.pos)
+        for n in nexts:
+            next_pos = n[0]
+            if next_pos not in visited:
+                next_node = Node(next_pos, current_node,
+                                n[1], current_node.cost + 1)
+                stack.push(next_node)
+    if last_node == None:
+        return []
+    while last_node.parent is not None:
+        actions.append(last_node.action)
+        last_node = last_node.parent
+    return actions[::-1]
 
 
 def breadthFirstSearch(problem):
-    """
-    utils.Insert(Comments)
-    """
-    solution = []
+    actions = []
     visited = []
-    mystate = problem.getStartState()
-    stack = Queue()
-    visited.append(mystate)
-    curentNode = Node(mystate, None, None, 0)
-    stack.push(curentNode)
-    while(not problem.isGoalState(curentNode.state) and not stack.isEmpty()):
-        curentNode = stack.pop()
-        if (problem.isGoalState(curentNode.state)):
-            lastNode = curentNode
+    last_node = None
+    current_pos = problem.getStartState()
+    queue = Queue()
+    visited.append(current_pos)
+    current_node = Node(current_pos, None, None, 0)
+    queue.push(current_node)
+    while(not problem.isGoalState(current_node.pos) and not queue.isEmpty()):
+        current_node = queue.pop()
+        if (problem.isGoalState(current_node.pos)):
+            last_node = current_node
             break
-        succesors = problem.getSuccessors(curentNode.state)
-        for succesor in succesors:
-            succesorState = succesor[0]
-            if succesorState not in visited:
-                visited.append(succesorState)
-                nextNode = Node(succesorState, curentNode,
-                                succesor[1], curentNode.cost + 1)
-                stack.push(nextNode)
-
-    while lastNode.parent is not None:
-        solution.append(lastNode.action)
-        lastNode = lastNode.parent
-    solution.reverse()
-    return solution
+        nexts = problem.getSuccessors(current_node.pos)
+        for n in nexts:
+            next_pos = n[0]
+            if next_pos not in visited:
+                visited.append(next_pos)
+                next_node = Node(next_pos, current_node,
+                                n[1], current_node.cost + 1)
+                queue.push(next_node)
+    if last_node == None:
+        return []
+    while last_node.parent is not None:
+        actions.append(last_node.action)
+        last_node = last_node.parent
+    return actions[::-1]
 
 
 def uniformCostSearch(problem):
-    """
-    utils.Insert(Comments)
-    """
-    solution = []
-    mystate = problem.getStartState()
-    store = PriorityQueue()
-    map = {}
-    curentNode = Node(mystate, None, None, 0)
-    store.push(curentNode, curentNode.cost)
-    map[mystate] = (curentNode)
-    lastNode = curentNode
-    while (not problem.isGoalState(curentNode.state) and not store.isEmpty()):
-        curentNode = store.pop()
-        if (problem.isGoalState(curentNode.state)):
-            lastNode = curentNode
+    actions = []
+    current_pos = problem.getStartState()
+    queue = PriorityQueue()
+    visited = {}
+    current_node = Node(current_pos, None, None, 0)
+    queue.push(current_node, current_node.cost)
+    visited[current_pos] = (current_node)
+    last_node = current_node
+    while (not problem.isGoalState(current_node.pos) and not queue.isEmpty()):
+        current_node = queue.pop()
+        if (problem.isGoalState(current_node.pos)):
+            last_node = current_node
             break
-        succesors = problem.getSuccessors(curentNode.state)
-        for (succesorState, succesorAction, succesorCost) in succesors:
-            nextNode = Node(succesorState, curentNode,
-                            succesorAction, curentNode.cost + succesorCost)
-            if (not map.has_key(succesorState)):
-                map[nextNode.state] = nextNode
-                store.push(nextNode, nextNode.cost)
-            elif nextNode.cost < map[succesorState].cost:
-                store.update(nextNode, nextNode.cost)
-                map[nextNode.state] = nextNode
-
-    while lastNode.parent is not None:
-        solution.append(lastNode.action)
-        lastNode = lastNode.parent
-    solution.reverse()
-    return solution
+        nexts = problem.getSuccessors(current_node.pos)
+        for (next_pos, next_action, next_cost) in nexts:
+            next_node = Node(next_pos, current_node,
+                            next_action, current_node.cost + next_cost)
+            if (not visited.has_key(next_pos)):
+                visited[next_node.pos] = next_node
+                queue.push(next_node, next_node.cost)
+            elif next_node.cost < visited[next_pos].cost:
+                queue.update(next_node, next_node.cost)
+                visited[next_node.pos] = next_node
+    if last_node == None:
+        return []
+    while last_node.parent is not None:
+        actions.append(last_node.action)
+        last_node = last_node.parent
+    return actions[::-1]
 
 
 def nullHeuristic(state, problem=None):
@@ -208,35 +197,35 @@ def nullHeuristic(state, problem=None):
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-  solution = []
-  mystate = problem.getStartState()
-  store = PriorityQueue()
-  map = {}
-  curentNode = Node(mystate, None, None, 0)
-  store.push(curentNode, curentNode.cost)
-  map[mystate] = (curentNode)
-  lastNode = curentNode
-  while (not problem.isGoalState(curentNode.state) and not store.isEmpty()):
-    curentNode = store.pop()
-    if (problem.isGoalState(curentNode.state)):
-      lastNode = curentNode
-      break
-    succesors = problem.getSuccessors(curentNode.state)
-    for (succesorState, succesorAction, succesorCost) in succesors:
-      nextNode = Node(succesorState, curentNode,
-                      succesorAction, curentNode.cost + succesorCost)
-      if (not map.has_key(succesorState)):
-          map[nextNode.state] = nextNode
-          store.push(nextNode, nextNode.cost + heuristic(succesorState,problem))
-      elif nextNode.cost < map[succesorState].cost:
-          store.push(nextNode, nextNode.cost + heuristic(succesorState,problem))
-          map[nextNode.state] = nextNode
-
-  while lastNode.parent is not None:
-    solution.append(lastNode.action)
-    lastNode = lastNode.parent
-  solution.reverse()
-  return solution
+    actions = []
+    current_pos = problem.getStartState()
+    queue = PriorityQueue()
+    visited = {}
+    current_node = Node(current_pos, None, None, 0)
+    queue.push(current_node, current_node.cost)
+    visited[current_pos] = (current_node)
+    last_node = current_node
+    while (not problem.isGoalState(current_node.pos) and not queue.isEmpty()):
+        current_node = queue.pop()
+        if (problem.isGoalState(current_node.pos)):
+            last_node = current_node
+            break
+        nexts = problem.getSuccessors(current_node.pos)
+        for (next_pos, next_action, next_cost) in nexts:
+            next_node = Node(next_pos, current_node,
+                            next_action, current_node.cost + next_cost)
+            if (not visited.has_key(next_pos)):
+                visited[next_node.pos] = next_node
+                queue.push(next_node, next_node.cost + heuristic(next_pos,problem))
+            elif next_node.cost < visited[next_pos].cost:
+                queue.push(next_node, next_node.cost + heuristic(next_pos,problem))
+                visited[next_node.pos] = next_node
+    if last_node == None:
+            return []
+    while last_node.parent is not None:
+        actions.append(last_node.action)
+        last_node = last_node.parent
+    return actions[::-1]
 
 
 # Abbreviations

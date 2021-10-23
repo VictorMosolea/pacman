@@ -589,8 +589,7 @@ class Game:
                     try:
                         timed_func = TimeoutFunction(agent.registerInitialState, int(self.rules.getMaxStartupTime(i)))
                         try:
-                            start_time = time.time()
-                            timed_func(self.state.deepCopy())
+                            timed_func(self.state.deepCopy(),pacman_index = i)
                             time_taken = time.time() - start_time
                             self.totalAgentTimes[i] += time_taken
                         except TimeoutFunctionException:
@@ -604,7 +603,7 @@ class Game:
                         self.unmute()
                         return
                 else:
-                    agent.registerInitialState(self.state.deepCopy())
+                    agent.registerInitialState(self.state.deepCopy(), pacman_index=i)
                 ## TODO: could this exceed the total time
                 self.unmute()
 
@@ -705,7 +704,7 @@ class Game:
             ###self.display.update( self.state.makeObservation(idx).data )
 
             # Allow for game specific conditions (winning, losing, etc.)
-            self.rules.process(self.state, self)
+            self.rules.process(self.state, self, agentIndex)
             # Track progress
             if agentIndex == numAgents + 1: self.numMoves += 1
             # Next agent

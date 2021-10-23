@@ -74,9 +74,10 @@ class SearchAgent(Agent):
     Note: You should NOT change any code in SearchAgent
     """
 
-    def __init__(self, fn='depthFirstSearch', prob='PositionSearchProblem', heuristic='nullHeuristic'):
+    def __init__(self, fn='depthFirstSearch', prob='PositionSearchProblem', heuristic='nullHeuristic', index=0):
         # Warning: some advanced Python magic is employed below to find the right functions and problems
-
+        self.index = index
+        self.winner_message = "SearchAgent with index {} emerged victorious solving {} with function {} and heuristic {}".format(index,prob,fn,heuristic)
         # Get the search function from the name and heuristic
         if fn not in dir(search):
             raise AttributeError, fn + ' is not a search function in search.py.'
@@ -103,7 +104,7 @@ class SearchAgent(Agent):
         self.searchType = globals()[prob]
         print('[SearchAgent] using problem type ' + prob)
 
-    def registerInitialState(self, state):
+    def registerInitialState(self, state, pacman_index=0):
         """
         This is the first time that the agent sees the layout of the game
         board. Here, we choose a path to the goal. In this phase, the agent
@@ -115,7 +116,7 @@ class SearchAgent(Agent):
         if self.searchFunction == None:
             raise Exception, "No search function provided for SearchAgent"
         starttime = time.time()
-        problem = self.searchType(state)  # Makes a new search problem
+        problem = self.searchType(state, index=pacman_index)  # Makes a new search problem
         self.actions = self.searchFunction(problem)  # Find a path
         totalCost = problem.getCostOfActions(self.actions)
         print('Path found with total cost of %d in %.1f seconds' %
@@ -152,7 +153,7 @@ class PositionSearchProblem(search.SearchProblem):
     Note: this search problem is fully specified; you should NOT change it.
     """
 
-    def __init__(self, gameState, costFn=lambda x: 1, goal=(1, 1), start=None, warn=True, visualize=True):
+    def __init__(self, gameState, costFn=lambda x: 1, goal=(1, 1), start=None, warn=True, visualize=True, index = 0):
         """
         Stores the start and goal.
 
@@ -161,7 +162,7 @@ class PositionSearchProblem(search.SearchProblem):
         goal: A position in the gameState
         """
         self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition()
+        self.startState = gameState.getPacmanPosition(index)
         if start != None:
             self.startState = start
         self.goal = goal
@@ -218,7 +219,6 @@ class PositionSearchProblem(search.SearchProblem):
         if state not in self._visited:
             self._visited[state] = True
             self._visitedlist.append(state)
-
         return successors
 
     def getCostOfActions(self, actions):
