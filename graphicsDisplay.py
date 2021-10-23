@@ -59,8 +59,8 @@ GHOST_SIZE = 0.65
 SCARED_COLOR = formatColor(1,1,1)
 
 GHOST_VEC_COLORS = map(colorToVector, GHOST_COLORS)
-
-PACMAN_COLOR = formatColor(255.0/255.0,255.0/255.0,61.0/255)
+PACMAN_COLOR_YELLOW = formatColor(255.0/255.0,255.0/255.0,61.0/255)
+PACMAN_COLOR_RED = formatColor(255.0/255.0,0.0/255.0,0.0/255)
 PACMAN_SCALE = 0.5
 #pacman_speed = 0.25
 
@@ -86,7 +86,7 @@ class InfoPane:
         self.base = (layout.height + 1) * gridSize
         self.height = INFO_PANE_HEIGHT
         self.fontSize = 24
-        self.textColor = PACMAN_COLOR
+        self.textColor = PACMAN_COLOR_YELLOW
         self.drawPane()
 
     def toScreen(self, pos, y = None):
@@ -236,7 +236,7 @@ class PacmanGraphics:
     def update(self, newState):
         agentIndex = newState._agentMoved
         agentState = newState.agentStates[agentIndex]
-
+        
         if self.agentImages[agentIndex][0].isPacman != agentState.isPacman: self.swapImages(agentIndex, agentState)
         prevState, prevImage = self.agentImages[agentIndex]
         if agentState.isPacman:
@@ -270,8 +270,12 @@ class PacmanGraphics:
         endpoints = self.getEndpoints(self.getDirection(pacman))
 
         width = PACMAN_OUTLINE_WIDTH
-        outlineColor = PACMAN_COLOR
-        fillColor = PACMAN_COLOR
+        if index == 1:
+            outlineColor = PACMAN_COLOR_RED
+            fillColor = PACMAN_COLOR_RED
+        else:
+            outlineColor = PACMAN_COLOR_YELLOW
+            fillColor = PACMAN_COLOR_YELLOW
 
         if self.capture:
             outlineColor = TEAM_COLORS[index % 2]

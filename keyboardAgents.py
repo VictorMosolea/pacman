@@ -11,7 +11,6 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
 from game import Agent
 from game import Directions
 import random
@@ -32,6 +31,7 @@ class KeyboardAgent(Agent):
         self.lastMove = Directions.STOP
         self.index = index
         self.keys = []
+        self.winner_message = "Player {} won!".format(index)
 
     def getAction( self, state):
         from graphicsUtils import keys_waiting
@@ -39,10 +39,8 @@ class KeyboardAgent(Agent):
         keys = keys_waiting() + keys_pressed()
         if keys != []:
             self.keys = keys
-
         legal = state.getLegalActions(self.index)
         move = self.getMove(legal)
-
         if move == Directions.STOP:
             # Try to move in the same direction as before
             if self.lastMove in legal:
